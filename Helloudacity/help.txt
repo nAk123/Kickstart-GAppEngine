@@ -1,0 +1,175 @@
+I noticed that many people are worried about using linux for this class, and are thinking about bailing on the platform in favor of friendlier, graphical tools. I really hope that this post will make some of you reconsider. Doing things through the terminal is a bit less intuitive, but is just as effective for what you want to do. Furthermore, the terminal gives you much more control over what is happening, and forces you to have a better understanding of what the app engine is doing under the hood when the shiny GUI (graphical user interface) buttons are clicked.
+
+I am using ubuntu 12.04 to write this post...
+
+1 Installing python:
+
+If you are using linux, you already have python installed! To verify the version of python you have, open the terminal and type in 'python'. This will cause you to go into the python console (the command prompt will change from the terminal prompt '$' to the python prompt '>>>', and you should see something like this
+
+denis@banana:~$ python
+Python 2.7.3 (default, Apr 10 2012, 12:29:04) 
+[GCC 4.6.3] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>>
+
+In this blurb you can see the version of python that is running on your machine (should be 2.7, as above). When you are done using the python console, type in 'quit()' or press "Ctrl+D", which is the end-of-file command that will make the python console close and take you back to the terminal. You should again see the terminal '$' as the prompt.
+
+2 Installing google appengine:
+
+There are two ways to do this. One is to simply follow the steps given in the video tutorial:
+
+    Go to the app engine download site: https://developers.google.com/appengine/downloads
+    Download the Python app engine for Linux by clicking the appropriate link.
+    Find the .zip file in your file browser and extract it using the archive manager.
+
+That's it! Since there is no GUI for linux, the app engine is simply a bunch of python code. In linux, you use the app engine by running the code from your terminal. The trick is to give each python script the appropriate command, and we will cover this in the next section.
+
+In the meanwhile, if you want to get some extra practice using your terminal, you can install app engine by using your terminal exclusively! Just run the following commands in the folder you want to install the app engine. I am using the project folder in my home directory here.
+
+cd ~
+mkdir projects
+cd projects
+wget http://googleappengine.googlecode.com/files/google_appengine_1.6.4.zip
+unzip google_appengine_1.6.4.zip
+
+cd is used to navigate directories. mkdir creates a new folder. wget is a terminal command that downloads the file form the url that follows it. unzip is the command that extracts the files and folders from their archived state.
+
+You now should have google app engine installed! In my case, it is in ~/projects/google_appengine/ , and that is the path I will use from now on. Your path may differ, and you should change it accordingly in the following instructions.
+
+3 Setting up a new application:
+
+This is probably the first place where you ran into some trouble. In the homework help video, at around 2:50, the instructor clicks the "new application" button. This does a number of things, that are described in the following guide: https://developers.google.com/appengine/docs/python/gettingstarted/devenvironment
+
+I will paraphrase the important bits in a linux-specific context below.
+
+First, we need to make a new folder to house our application. I will be using the udacity-hw1 folder in my projects folder:
+
+cd ~/projects/
+mkdir udacity-hw1
+cd udacity-hw1
+
+Next, we need to create a number of files that will set up the back bone of our application in a format that google app engine can understand. This is done automatically when you create a new project in the GUI, but it's really not too complicated.
+
+We need to create a python script that tells our program what to do. We can do this as follows:
+
+gedit main.py
+
+This will open up a new program, gedit (which is like an advanced notepad), with a blank file, main.py. The GUI automatically fills this file with some template code to get you started (as you can see at 3:29 in the video), so we will simply replicate this code ourselves. (I am sure later in the class we will get a more detailed overview of what this code does, and start manipulating it to do cool new things). For now, just paste the following into your main.py file:
+
+import webapp2
+
+class MainHandler(webapp2.RequestHandler):
+  def get(self):
+    self.response.out.write('Hello, World!')
+
+app = webapp2.WSGIApplication([('/', MainHandler)], debug=True)
+
+Save the file (File>Save or simply Ctrl+S), and exit gedit. This will take you back to your terminal.
+
+Now, there is another bit of background business that the GUI for app engine does that we need to take care of. This is the app.yaml file. This is a configuration file that tells our app how to respond to requests from clients. Again, this is created automatically by the GUI, so we will simply copy that template for now. In terminal, in your udacity-hw1 folder, run:
+
+gedit app.yaml
+
+This will open another blank gedit window. There, paste the following:
+
+application: helloworld
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: true
+handlers:
+- url: /.*
+  script: main.app
+
+Save (Ctrl+S or File>Save), and close the window. That's it! You now have all the code you need for a simple hello world program.
+
+4 Testing Your Code:
+
+The next thing that the video goes over is the "Run" command in the GUI. All this command does is call the appropriate python script from the google app engine. Specifically, it calls the dev_appserver.py script. You can read up about the script by running:
+
+python ~/projects/google_appengine/dev_appserver.py
+
+The command starts with the word python, which tells your terminal that you would like to use python to execute the following script. Since we don't specify anything for the script to do, it just spits out a helpful message about what it does and how to use it, and then quits.
+
+We would like to test our program, however, so what we need to do is specify the folder containing our app for the script. We do this like so:
+
+python ~/projects/google_appengine/dev_appserver.py ~/projects/udacity-hw1/
+
+If everything is going according to plan, this will create a local space for you to test out your code. Your computer becomes a server, like the google app servers, so that you can locally test your program. You will see something like the following:
+
+denis@banana:~/projects/udacity-hw1$ python ~/projects/google_appengine/dev_appserver.py ~/projects/udacity-hw1/
+WARNING  2012-04-19 16:15:03,217 rdbms_mysqldb.py:74] The rdbms API is not available because the MySQLdb library could not be loaded.
+Warning: You are using a Python runtime (2.7) that is more recent than the production runtime environment (2.5). Your application may use features that are not available in the production environment and may not work correctly when deployed to production.
+INFO     2012-04-19 16:15:03,265 appengine_rpc.py:160] Server: appengine.google.com
+INFO     2012-04-19 16:15:03,267 appcfg.py:582] Checking for updates to the SDK.
+INFO     2012-04-19 16:15:03,326 appcfg.py:616] This SDK release is newer than the advertised release.
+WARNING  2012-04-19 16:15:03,326 datastore_file_stub.py:513] Could not read datastore data from /tmp/dev_appserver.datastore
+INFO     2012-04-19 16:15:03,346 dev_appserver_multiprocess.py:647] Running application dev~helloworld on port 8080: http://localhost:8080
+INFO     2012-04-19 16:15:03,346 dev_appserver_multiprocess.py:649] Admin console is available at: http://localhost:8080/_ah/admin
+
+We are particularly interested in the 4th INFO line, that tells us that the script is now hosting our application on port 8080. So, when we go to our browser and navigate to localhost:8080, we should see the hello world message! Furtheremore, if you look back at the console, you can see yourself making requests to the server every time you hit "refresh", as so:
+
+INFO     2012-04-19 16:28:44,667 dev_appserver.py:2884] "GET / HTTP/1.1" 200 -
+INFO     2012-04-19 16:28:44,699 dev_appserver.py:2884] "GET /favicon.ico HTTP/1.1" 404 -
+
+This would be a good time to modify your files to finish the homework assignment (make the page say "hello, udacity"). Once you are done testing, you can "kill" the dev_appserver script by typing Ctrl-C in the terminal.
+
+5. Deploying your app:
+
+The first thing you need to do is to sign up for an account with google app engine. This is done by going to this link and clicking Sign Up: https://developers.google.com/appengine/
+
+Once signed up, you will gain access to your appengine control panel at https://appengine.google.com/ This interface will allow you to manage your applications as they appear to users on the web. Make a new application here by clicking the create application button. You may have to get a bit creative to find an identifier that hasn't been taken yet. Name your application whatever you want.
+
+Now that we have an online "placeholder" for our app, we need to update this with the code that we have created on our own machine. While this is a single button in the GUI, it is again a python script within the google appengine folder for us, appcfg.py.
+
+You can read up on what appcfg.py does by typing:
+
+python ~/projects/google_appengine/appcfg.py
+
+One bit of background work that the GUI does is to reconfigure the app.yaml to point to the correct application id (the unique id that you signed up for above). This lets the google web servers know what application you are using and updating, as well as the url of your application. So, we need to open the app.yaml file and change that line to match the application name you created.
+
+gedit app.yaml
+
+For me, the application id is udacity-linux-test, so I changed the line
+
+application: helloworld
+
+to
+
+application: udacity-linux-test
+
+Save and exit. You are ready to upload your app to the world-wide-web! All that's left to do is run:
+
+python ~/projects/google_appengine/appcfg.py update ~/projects/udacity-hw1/
+
+The update keyword tells the appcfg script that you would like to update the online version of your application with the contents of the folder udacity-hw1. The program knows which online application to update based on the unique application name in the app.yaml file. If everything goes according to plan, you will see something like this:
+
+denis@banana:~/projects/udacity-hw1$ python ~/projects/google_appengine/appcfg.py update ~/projects/udacity-hw1/
+Application: udacity-linux-test; version: 1
+Host: appengine.google.com
+
+Starting update of app: udacity-linux-test, version: 1
+Getting current resource limits.
+Scanning files on local disk.
+Cloning 2 application files.
+Uploading 2 files and blobs.
+Uploaded 2 files and blobs
+Compilation starting.
+Compilation completed.
+Starting deployment.
+Checking if deployment succeeded.
+Will check again in 1 seconds.
+Checking if deployment succeeded.
+Will check again in 2 seconds.
+Checking if deployment succeeded.
+Will check again in 4 seconds.
+Checking if deployment succeeded.
+Will check again in 8 seconds.
+Checking if deployment succeeded.
+Deployment successful.
+Checking if updated app version is serving.
+Completed update of app: udacity-linux-test, version: 1
+
+Verify that your code is online by going to the url specified by your unique app identifier: http://udacity-linux-test.appspot.com/ This is also the URL you will submit as your homework assignment.
+
+I hope this helped folks out there!
